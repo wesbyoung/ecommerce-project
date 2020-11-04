@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+{% set active_page='profile' -%}
+
+{% block title %}
+    {{ super() }} | {{ "{} {}".format(current_user.first_name, current_user.last_name) }}
+{% endblock %}
+
+{% block body %}
+    <h3>Profile Page</h3>
+    <hr>
+    <h4>Hello, {{ "{} {}".format(current_user.first_name, current_user.last_name) }}</h4>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-8">
+                <ul class="list-group">
+                    {% if current_user.is_authenticated %}
+                        {% for p in posts %}
+                            <li class="list-group-item">
+                                <p>
+                                    <h5>
+                                        <a href="#">{{ p.body }}</a>
+                                    </h5>
+                                </p>
+                                <cite>
+                                    &mdash; {{ "{} {}".format(current_user.first_name, current_user.last_name) }} @ {{ moment(p.created_on) }}
+                                </cite>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                    <h3>No posts to show</h3>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Other Users</h6>
+                <ul class="list-group">
+                    {% for u in users %}
+                    <li class="list-group-item">{{" {} {} ".format(u.first_name, u.last_name) }}
+                        <span class="float-right">
+                            {% if current_user.is_following(u)%}
+                                <a href="{{ url_for('unfollow', id =u.id) }}" class="btn btn-warning btn-sm">Unfollow</a>
+                            {% else%}
+                                <a href="{{ url_for('follow', id =u.id) }}" class="btn btn-info btn-sm">Follow</a>
+                            {% endif %}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div> 
+        </div>
+
+    </div>
+{% endblock %}
+    

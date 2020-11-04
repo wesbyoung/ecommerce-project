@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h3>
+    Shopping Cart
+    <span class="float-right">
+        <a href="{{ url_for('shop.clear_cart') }}" class="btn btn-sm btn-danger">
+            Clear Cart <i class="fa fa-trash" aria-hidden="true"></i>
+        </a>
+    </span>
+</h3>
+<hr>
+<div class="card-body">
+    {% for item in items %}
+        <!-- PRODUCT -->
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-2 text-center">
+                <img class="img-fluid" src="{{ item.image }}" alt="{{ item.name }}">
+            </div>
+            <div class="col-12 text-sm-center col-sm-12 text-md-left col-md-6">
+                <h4 class="product-name"><strong>{{ item.name }}</strong></h4>
+                <h4>
+                    <small>{{ item.description }}</small>
+                </h4>
+            </div>
+
+
+            <div>
+                <div class="quantity">
+                    <input type="button" value="+" class="plus">
+                    <input type="number" step="1" max="99" min="1" value="{{item.quantity}}" title="Qty" class="qty" size="4">
+                    <input type="button" value="-" class="minus">
+                </div>
+            </div>
+            
+            
+                <div class="col-2 col-sm-2 col-md-2 text-right">
+                </div>
+           
+        </div>
+        <a href="{{ url_for('shop.remove_from_cart', id=item.id) }}" type="button" style="color: white;" class="btn btn-danger ">
+            <i class="fa fa-trash" aria-hidden="true">Remove from Cart</i>
+        </a>
+        <hr>
+    {% endfor %}
+    <!-- END PRODUCT -->
+    <div class="pull-right">
+        <a href="" class="btn btn-outline-secondary pull-right">
+            Update shopping cart
+        </a>
+    </div>
+</div>
+<div class="card-footer">
+    <div class="coupon col-md-5 col-sm-5 no-padding-left pull-left">
+        <div class="row">
+            <div class="col-6">
+                <input type="text" class="form-control" placeholder="coupon code">
+            </div>
+            <div class="col-6">
+                <input type="submit" class="btn btn-default" value="Use coupon">
+            </div>
+        </div>
+    </div>
+    <div class="pull-right" style="margin: 10px">
+        <button id="checkout-button" class="btn btn-success pull-right">Checkout</button>
+        <div class="pull-right" style="margin: 5px">
+            Total price: <b>{{ '${:,.2f}'.format(cart_total) }}</b>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // console.log('{{ stripe_publishable_key }}')
+        var stripe = Stripe('{{ stripe_publishable_key }}');
+        console.log(stripe);
+
+        $('#checkout-button').on('click', function (e) {
+            fetch('{{ url_for("shop.create_checkout_session") }}', {
+                method: 'POST'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (session) {
+                return stripe.redirectToCheckout({ sessionId: session.id })
+            })
+            .then(function (result) {
+                // Something to happen once the result is a success
+            })
+            .catch(function (error) {
+                console.error('Error:', error)
+            })
+        })
+    </script>
+{% endblock %}
